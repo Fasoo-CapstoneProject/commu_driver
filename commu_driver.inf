@@ -1,0 +1,127 @@
+;;;
+;;; commu_driver
+;;;
+;;;
+;;; Copyright (c) 1999 - 2002, Microsoft Corporation
+;;;
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = "ActivityMonitor"             ;This is determined by the work this filter driver does
+ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}    ;This value is determined by the Class
+Provider    = %ProviderString%
+DriverVer = 10/24/2024,19.24.32.627
+CatalogFile = commu_driver.cat
+PnpLockdown = 1
+
+[SourceDisksFiles]
+commu_driver.sys = 1,,
+
+[SourceDisksNames]
+1 = %DiskId1%,,,
+
+[DestinationDirs]
+commu_driverDownlevel.CopyDriverFiles  = 12            ;%windir%\system32\drivers
+commu_driverDownlevel.DelDriverFiles   = 12            ;%windir%\system32\drivers
+commu_driver.DriverFiles               = 13            ;driver store
+
+;;
+;; Default install sections
+;;
+
+[DefaultInstall.NTamd64.10.0...25952]
+OptionDesc  = %ServiceDescription%
+CopyFiles   = commu_driver.DriverFiles
+
+[DefaultInstall.NTamd64.10.0...25952.Services]
+AddService  = %ServiceName%,,commu_driver.Service
+
+;
+; Support sections
+;
+
+[commu_driver.Service]
+DisplayName      = %ServiceName%
+Description      = %ServiceDescription%
+ServiceBinary    = %13%\%DriverName%.sys    ;%windir%\system32\drivers\
+Dependencies     = "FltMgr"
+ServiceType      = 2                        ;SERVICE_FILE_SYSTEM_DRIVER
+StartType        = 3                        ;SERVICE_DEMAND_START
+ErrorControl     = 1                        ;SERVICE_ERROR_NORMAL
+LoadOrderGroup   = "FSFilter Activity Monitor"
+AddReg           = commu_driver.AddRegistry
+
+[commu_driver.AddRegistry]
+HKR,"Parameters","SupportedFeatures",0x00010001,0x3
+HKR,"Parameters\Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Parameters\Instances\"%Instance1.Name%,"Altitude",0x00000000,%Instance1.Altitude%
+HKR,"Parameters\Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
+
+[commu_driver.DriverFiles]
+%DriverName%.sys
+
+;;
+;; Downlevel default install sections
+;;
+
+[DefaultInstall.NTamd64]
+OptionDesc  = %ServiceDescription%
+CopyFiles   = commu_driverDownlevel.CopyDriverFiles
+
+[DefaultInstall.NTamd64.Services]
+AddService  = %ServiceName%,,commu_driverDownlevel.Service
+
+;;
+;; Downlevel default uninstall sections
+;;
+
+[DefaultUninstall.NTamd64]
+LegacyUninstall = 1
+DelFiles        = commu_driverDownlevel.DelDriverFiles
+
+[DefaultUninstall.NTamd64.Services]
+DelService      = %ServiceName%,0x200      ;Ensure service is stopped before deleting
+
+;
+; Downlevel support sections
+;
+
+[commu_driverDownlevel.Service]
+DisplayName      = %ServiceName%
+Description      = %ServiceDescription%
+ServiceBinary    = %12%\%DriverName%.sys    ;%windir%\system32\drivers\
+Dependencies     = "FltMgr"
+ServiceType      = 2                        ;SERVICE_FILE_SYSTEM_DRIVER
+StartType        = 3                        ;SERVICE_DEMAND_START
+ErrorControl     = 1                        ;SERVICE_ERROR_NORMAL
+LoadOrderGroup   = "FSFilter Activity Monitor"
+AddReg           = commu_driverDownlevel.AddRegistry
+
+[commu_driverDownlevel.AddRegistry]
+HKR,,"SupportedFeatures",0x00010001,0x3
+HKR,"Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Instances\"%Instance1.Name%,"Altitude",0x00000000,%Instance1.Altitude%
+HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
+
+[commu_driverDownlevel.CopyDriverFiles]
+%DriverName%.sys
+
+[commu_driverDownlevel.DelDriverFiles]
+%DriverName%.sys
+
+;;
+;; String Section
+;;
+
+[Strings]
+ProviderString          = "commu_driver"
+ServiceDescription      = "commu_driver mini-filter driver"
+ServiceName             = "commu_driver"
+DriverName              = "commu_driver"
+DiskId1                 = "commu_driver Device Installation Disk"
+
+;Instances specific information.
+DefaultInstance         = "commu_driver"
+Instance1.Name          = "commu_driver"
+Instance1.Altitude      = "370020"
+Instance1.Flags         = 0x1          ; Suppress automatic attachments
